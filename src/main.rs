@@ -1,5 +1,7 @@
+
 use rand::seq::IteratorRandom;
 use std::io;
+use rodio::Source;
 use std::{
     fs::File,
     io::{BufRead, BufReader},
@@ -9,6 +11,7 @@ use std::{
 const DICT_PATH: &str = "src/dict.txt";
 
 fn main() {
+    let device = rodio::default_output_device().unwrap();
     loop {
         // Bring couples 
         let (first_word, second_word) = detached_words(rand_dictword());
@@ -23,7 +26,12 @@ fn main() {
             true => {
                 println!("\nYou are cool!\nNext word:\n");
             }, 
-            _ => println!("\nWrong try it again\n")
+            _ => {
+                println!("\nWrong try it again\n");
+                let file = File::open("src/pew.wav").unwrap();
+                let source = rodio::Decoder::new(BufReader::new(file)).unwrap();
+                rodio::play_raw(&device, source.convert_samples());
+            }
         }
     }
 }
